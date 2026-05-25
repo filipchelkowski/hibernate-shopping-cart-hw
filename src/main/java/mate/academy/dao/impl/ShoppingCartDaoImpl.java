@@ -8,6 +8,7 @@ import mate.academy.model.User;
 import mate.academy.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 public class ShoppingCartDaoImpl implements ShoppingCartDao {
     @Override
@@ -17,7 +18,7 @@ public class ShoppingCartDaoImpl implements ShoppingCartDao {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             transaction = session.beginTransaction();
-            session.persist(shoppingCart);
+            session.save(shoppingCart);
             transaction.commit();
             return shoppingCart;
         } catch (Exception e) {
@@ -35,6 +36,17 @@ public class ShoppingCartDaoImpl implements ShoppingCartDao {
 
     @Override
     public Optional<ShoppingCart> getByUser(User user) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<ShoppingCart> getShoppingCartByUserQuery =
+                    session.createQuery("FROM ShoppingCart sc "
+                            + "LEFT JOIN FETCH sc.tickets "
+                            + "WHERE sc.user = :user ", ShoppingCart.class);
+            getShoppingCartByUserQuery.setParameter("user", user);
+            return getShoppingCartByUserQuery.uniqueResultOptional();
+        } catch (Exception e) {
+            throw new DataProcessingException("Can't get a shopping cart by user: " + user, e);
+        }
+        /**
         return HibernateUtil.getSessionFactory().openSession()
                 .createQuery(
                         "SELECT sc FROM ShoppingCart sc LEFT JOIN FETCH"
@@ -44,6 +56,7 @@ public class ShoppingCartDaoImpl implements ShoppingCartDao {
                 .getResultList()
                 .stream()
                 .findFirst();
+        **/
     }
 
     @Override

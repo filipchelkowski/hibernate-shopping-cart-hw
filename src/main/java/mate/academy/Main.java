@@ -66,11 +66,11 @@ public class Main {
         ShoppingCart shoppingCart = new ShoppingCart();
 
         try {
+            shoppingCartServiceImpl.registerNewShoppingCart(user);
+
             shoppingCartServiceImpl.addSession(tomorrowMovieSession, user);
 
             shoppingCartServiceImpl.getByUser(user);
-
-            shoppingCartServiceImpl.registerNewShoppingCart(user);
 
             shoppingCartServiceImpl.clear(shoppingCart);
 
